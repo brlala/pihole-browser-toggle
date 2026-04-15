@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="popup">
+      <header id="status" class="status" data-state="loading">
+        <span class="status__dot" aria-hidden="true"></span>
+        <div class="status__lockup">
+          <span class="status__label">Checking</span>
+          <span id="statusMeta" class="status__meta"></span>
+        </div>
+        <span class="status__host" id="statusHost"></span>
+      </header>
+
+      <section id="unconfigured" class="unconfigured hidden">
+        <p>Pi-hole isn't configured.</p>
+        <button id="openOptions" class="btn btn--primary">Open settings</button>
+      </section>
+
+      <section id="controls" class="controls hidden">
+        <div class="section-label">Disable for</div>
+
+        <div class="grid">
+          <button class="cell" data-seconds="10">
+            <span class="cell__value">10</span>
+            <span class="cell__unit">sec</span>
+          </button>
+          <button class="cell" data-seconds="30">
+            <span class="cell__value">30</span>
+            <span class="cell__unit">sec</span>
+          </button>
+          <button class="cell" data-seconds="60">
+            <span class="cell__value">1</span>
+            <span class="cell__unit">min</span>
+          </button>
+          <button class="cell" data-seconds="300">
+            <span class="cell__value">5</span>
+            <span class="cell__unit">min</span>
+          </button>
+          <button class="cell cell--text" id="customBtn">
+            <span class="cell__label">Custom</span>
+          </button>
+          <button class="cell cell--text cell--hold" data-seconds="null">
+            <span class="cell__label">Hold</span>
+          </button>
+        </div>
+
+        <div id="customRow" class="custom hidden">
+          <input id="customValue" type="number" min="1" value="15" class="custom__input" />
+          <select id="customUnit" class="custom__unit">
+            <option value="1">sec</option>
+            <option value="60" selected>min</option>
+            <option value="3600">hr</option>
+          </select>
+          <button id="customGo" class="btn btn--primary">Go</button>
+        </div>
+
+        <button id="enableBtn" class="resume hidden">Resume blocking</button>
+      </section>
+
+      <div id="error" class="error hidden"></div>
+
+      <footer class="footer">
+        <span class="footer__mark">PI · HOLE · TOGGLE</span>
+        <a href="#" id="settingsLink">Settings</a>
+      </footer>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

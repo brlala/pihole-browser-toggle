@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Generate Pi-hole Toggle icons</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background: #1a1a1a;
+        color: #eee;
+        padding: 40px;
+        max-width: 640px;
+        margin: 0 auto;
+      }
+      h1 { font-size: 22px; margin-bottom: 6px; }
+      p  { color: #aaa; font-size: 13px; }
+      .row {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        margin-top: 24px;
+      }
+      .preview {
+        background: repeating-conic-gradient(#2a2a2a 0 25%, #1f1f1f 0 50%) 0 0 / 12px 12px;
+        padding: 8px;
+        border-radius: 6px;
+      }
+      button {
+        padding: 10px 16px;
+        background: #f39c3c;
+        color: #111;
+        border: none;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      button:hover { background: #ffac4a; }
+      code { color: #f39c3c; }
+    </style>
+  </head>
+  <body>
+    <h1>Pi-hole Toggle — icon generator</h1>
+    <p>
+      Click <b>Generate all</b>. Your browser will download
+      <code>icon-16.png</code>, <code>icon-48.png</code>,
+      <code>icon-128.png</code>, and <code>promo-440x280.png</code>.
+      Save them into this <code>icons/</code> folder (move the promo tile wherever you like —
+      it's for the store listing, not bundled in the extension).
+    </p>
+
+    <div class="row">
+      <div class="preview"><canvas id="p16"  width="16"  height="16"></canvas></div>
+      <div class="preview"><canvas id="p48"  width="48"  height="48"></canvas></div>
+      <div class="preview"><canvas id="p128" width="128" height="128"></canvas></div>
+    </div>
+
+    <div class="row">
+      <div class="preview" style="padding:0"><canvas id="pPromo" width="440" height="280"></canvas></div>
+    </div>
+
+    <div class="row">
+      <button id="go">Generate all</button>
+    </div>
+
+    <script>
+      // Palette — matches popup.css
+      const BG     = "#1f2530";
+      const BORDER = "#3a4252";
+      const DOT    = "#f3a94a";  // amber
+      const DOT_GLOW = "rgba(243, 169, 74, 0.35)";
+      const TEXT   = "#f4f4f4";
+
+      // Hypothesis: a single amber "status dot" on a dark rounded square —
+      // the memorable element from the popup, readable at 16px.
+      function drawIcon(ctx, size) {
+        const r = Math.max(2, Math.round(size * 0.18)); // corner radius
+        const pad = Math.max(0, Math.round(size * 0.0));
+
+        // Background (rounded square)
+        ctx.clearRect(0, 0, size, size);
+        roundedRect(ctx, pad, pad, size - pad * 2, size - pad * 2, r);
+        const grad = ctx.createLinearGradient(0, 0, 0, size);
+        grad.addColorStop(0, "#242b38");
+        grad.addColorStop(1, "#161b24");
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Inner border hairline
+        if (size >= 32) {
+          ctx.lineWidth = Math.max(1, size * 0.012);
+          ctx.strokeStyle = BORDER;
+          roundedRect(ctx, pad + 0.5, pad + 0.5, size - pad * 2 - 1, size - pad * 2 - 1, r - 0.5);
+          ctx.stroke();
+        }
+
+        // Glow ring
+        const cx = size / 2;
+        const cy = size / 2;
+        const dotR = size * 0.22;
+
+        if (size >= 24) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, dotR * 1.9, 0, Math.PI * 2);
+          const glow = ctx.createRadialGradient(cx, cy, dotR, cx, cy, dotR * 2.2);
+          glow.addColorStop(0, DOT_GLOW);
+          glow.addColorStop(1, "rgba(243, 169, 74, 0)");
+          ctx.fillStyle = glow;
+          ctx.fill();
+        }
+
+        // Dot
+        ctx.beginPath();
+        ctx.arc(cx, cy, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = DOT;
+        ctx.fill();
+
+        // Tiny highlight on dot for tactility (48+ only)
+        if (size >= 48) {
+          ctx.beginPath();
+          ctx.arc(cx - dotR * 0.3, cy - dotR * 0.3, dotR * 0.35, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+          ctx.fill();
+        }
+      }
+
+      function roundedRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y,     x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x,     y + h, r);
+        ctx.arcTo(x,     y + h, x,     y,     r);
+        ctx.arcTo(x,     y,     x + w, y,     r);
+        ctx.closePath();
+      }
+
+      function drawPromo(ctx, w, h) {
+        // Background
+        const grad = ctx.createLinearGradient(0, 0, w, h);
+        grad.addColorStop(0, "#1c2230");
+        grad.addColorStop(1, "#10141c");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+
+        // Subtle grid
+        ctx.strokeStyle = "rgba(255,255,255,0.03)";
+        ctx.lineWidth = 1;
+        for (let x = 0; x < w; x += 20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+        for (let y = 0; y < h; y += 20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+
+        // Icon on left
+        const iconSize = 128;
+        const iconX = 36;
+        const iconY = (h - iconSize) / 2;
+        ctx.save();
+        ctx.translate(iconX, iconY);
+        const sub = ctx; // reuse context; drawIcon expects size to scale to
+        drawIcon(sub, iconSize);
+        ctx.restore();
+
+        // Type lockup on right
+        const textX = iconX + iconSize + 28;
+        ctx.fillStyle = TEXT;
+        ctx.font = "700 32px 'Host Grotesk', system-ui, sans-serif";
+        ctx.textBaseline = "alphabetic";
+        ctx.fillText("Pi-hole Toggle", textX, h / 2 - 6);
+
+        ctx.fillStyle = "#9aa3b4";
+        ctx.font = "500 14px 'Geist Mono', ui-monospace, monospace";
+        ctx.fillText("One-click temporary disable", textX, h / 2 + 20);
+
+        // Accent dot
+        ctx.beginPath();
+        ctx.arc(textX + 2, h / 2 + 44, 4, 0, Math.PI * 2);
+        ctx.fillStyle = DOT;
+        ctx.fill();
+        ctx.fillStyle = "#7f8a9c";
+        ctx.font = "500 11px 'Geist Mono', ui-monospace, monospace";
+        ctx.fillText("  open · 4:27", textX + 6, h / 2 + 47);
+      }
+
+      function download(canvas, filename) {
+        const link = document.createElement("a");
+        link.download = filename;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      }
+
+      function renderAll() {
+        [["p16", 16], ["p48", 48], ["p128", 128]].forEach(([id, size]) => {
+          const c = document.getElementById(id);
+          const ctx = c.getContext("2d");
+          drawIcon(ctx, size);
+        });
+        drawPromo(document.getElementById("pPromo").getContext("2d"), 440, 280);
+      }
+
+      document.getElementById("go").addEventListener("click", async () => {
+        renderAll();
+        download(document.getElementById("p16"),  "icon-16.png");
+        await new Promise((r) => setTimeout(r, 150));
+        download(document.getElementById("p48"),  "icon-48.png");
+        await new Promise((r) => setTimeout(r, 150));
+        download(document.getElementById("p128"), "icon-128.png");
+        await new Promise((r) => setTimeout(r, 150));
+        download(document.getElementById("pPromo"), "promo-440x280.png");
+      });
+
+      renderAll();
+    </script>
+  </body>
+</html>

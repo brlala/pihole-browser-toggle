@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Pi-hole Toggle · Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg:            oklch(0.14 0.012 255);
+        --bg-raised:     oklch(0.19 0.014 255);
+        --bg-hover:      oklch(0.23 0.016 255);
+        --border:        oklch(0.28 0.015 255);
+        --border-strong: oklch(0.42 0.018 255);
+        --text:          oklch(0.96 0.005 255);
+        --text-muted:    oklch(0.66 0.010 255);
+        --text-dim:      oklch(0.48 0.012 255);
+        --accent:        oklch(0.80 0.15 58);
+        --accent-soft:   oklch(0.80 0.15 58 / 0.14);
+        --accent-ink:    oklch(0.14 0.02 58);
+        --ok:            oklch(0.80 0.13 155);
+        --ok-soft:       oklch(0.80 0.13 155 / 0.14);
+        --alert:         oklch(0.74 0.18 35);
+        --alert-soft:    oklch(0.74 0.18 35 / 0.14);
+        --font-display: 'Host Grotesk', system-ui, sans-serif;
+        --font-mono: 'Geist Mono', ui-monospace, monospace;
+        --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      html, body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-display);
+        font-size: 14px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+      }
+
+      .page {
+        max-width: 460px;
+        margin: 0 auto;
+        padding: 72px 32px 96px;
+      }
+
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 16px;
+      }
+
+      h1 {
+        font-size: clamp(28px, 3.2vw, 36px);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+        margin-bottom: 10px;
+      }
+
+      .lede {
+        color: var(--text-muted);
+        font-size: 14px;
+        max-width: 42ch;
+      }
+
+      hr.rule {
+        border: none;
+        height: 1px;
+        background: var(--border);
+        margin: 40px 0 28px;
+      }
+
+      fieldset { border: none; }
+
+      .field { margin-bottom: 22px; }
+
+      .field label.heading {
+        display: block;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 8px;
+      }
+
+      .field .optional {
+        color: var(--text-dim);
+        font-weight: 400;
+        letter-spacing: 0.06em;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--bg-raised);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        color: var(--text);
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0.01em;
+        transition: border-color 140ms var(--ease), background 140ms var(--ease);
+      }
+
+      input[type="text"]::placeholder,
+      input[type="password"]::placeholder {
+        color: var(--text-dim);
+      }
+
+      input[type="text"]:focus,
+      input[type="password"]:focus {
+        outline: none;
+        border-color: var(--accent);
+        background: color-mix(in oklab, var(--bg-raised) 80%, var(--accent-soft));
+      }
+
+      .hint {
+        margin-top: 6px;
+        color: var(--text-dim);
+        font-size: 12px;
+        font-family: var(--font-mono);
+        letter-spacing: 0.01em;
+      }
+
+      .switch {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 16px;
+        background: var(--bg-raised);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: border-color 140ms var(--ease);
+      }
+      .switch:hover { border-color: var(--border-strong); }
+
+      .switch__text { min-width: 0; }
+      .switch__title {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .switch__desc {
+        display: block;
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 3px;
+      }
+
+      .switch input { display: none; }
+
+      .switch__track {
+        position: relative;
+        width: 34px;
+        height: 20px;
+        background: oklch(0.26 0.012 255);
+        border-radius: 20px;
+        flex-shrink: 0;
+        transition: background 160ms var(--ease);
+      }
+      .switch__track::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        background: var(--text);
+        border-radius: 50%;
+        transition: left 160ms var(--ease), background 160ms var(--ease);
+      }
+      .switch input:checked ~ .switch__track { background: var(--accent); }
+      .switch input:checked ~ .switch__track::after {
+        left: 16px;
+        background: var(--accent-ink);
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 32px;
+        align-items: center;
+      }
+
+      .btn {
+        font-family: var(--font-display);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 0 18px;
+        height: 40px;
+        border: 1px solid var(--border);
+        background: var(--bg-raised);
+        color: var(--text);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: border-color 140ms var(--ease), background 140ms var(--ease);
+      }
+      .btn:hover { border-color: var(--border-strong); }
+
+      .btn--primary {
+        background: var(--accent);
+        color: var(--accent-ink);
+        border-color: var(--accent);
+      }
+      .btn--primary:hover {
+        background: oklch(0.84 0.15 58);
+        border-color: oklch(0.84 0.15 58);
+      }
+
+      .result {
+        margin-top: 20px;
+        padding: 12px 14px;
+        border-radius: 4px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        line-height: 1.5;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        letter-spacing: 0.01em;
+      }
+      .result:empty { display: none; }
+      .result::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-top: 5px;
+        flex-shrink: 0;
+      }
+      .result.ok {
+        background: var(--ok-soft);
+        color: var(--ok);
+        border: 1px solid color-mix(in oklab, var(--ok) 30%, transparent);
+      }
+      .result.ok::before { background: var(--ok); }
+
+      .result.err {
+        background: var(--alert-soft);
+        color: oklch(0.88 0.10 35);
+        border: 1px solid color-mix(in oklab, var(--alert) 30%, transparent);
+      }
+      .result.err::before { background: var(--alert); }
+
+      .result.pending {
+        background: var(--bg-raised);
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+      }
+      .result.pending::before { background: var(--text-dim); animation: pulse 1.2s ease-in-out infinite; }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 0.4; }
+        50%      { opacity: 1; }
+      }
+
+      .meta {
+        margin-top: 64px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="eyebrow">Pi · Hole · Toggle</div>
+      <h1>Connect your Pi-hole.</h1>
+      <p class="lede">One-time setup. Credentials live on this device only.</p>
+
+      <hr class="rule" />
+
+      <fieldset>
+        <div class="field">
+          <label class="heading" for="host">Host</label>
+          <input id="host" type="text" placeholder="http://pi.hole" spellcheck="false" autocapitalize="off" />
+          <div class="hint">Origin only — e.g. <code>http://pihole.home</code>. Don't include <code>/admin</code>.</div>
+        </div>
+
+        <div class="field">
+          <label class="heading" for="password">
+            Password <span class="optional">— optional</span>
+          </label>
+          <input id="password" type="password" placeholder="Leave blank if unset" />
+          <div class="hint">Leave empty if your Pi-hole has no password configured.</div>
+        </div>
+
+        <div class="field">
+          <label class="heading">Behavior</label>
+          <label class="switch">
+            <div class="switch__text">
+              <span class="switch__title">Reload active tab</span>
+              <span class="switch__desc">After disabling, refresh the current page automatically.</span>
+            </div>
+            <input id="reloadTab" type="checkbox" checked />
+            <span class="switch__track" aria-hidden="true"></span>
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button id="save" class="btn btn--primary">Save</button>
+        <button id="test" class="btn">Test connection</button>
+      </div>
+
+      <div id="result" class="result"></div>
+
+      <div class="meta">
+        <span>v1.0</span>
+        <span>Pi-hole v6</span>
+      </div>
+    </main>
+
+    <script src="options.js"></script>
+  </body>
+</html>
