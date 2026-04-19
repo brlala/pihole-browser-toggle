@@ -63,7 +63,7 @@ Source code and privacy policy are available in the project repository.
 **storage**
 `Stores the user's Pi-hole address, password, and reload-tab preference locally on their device.`
 
-**activeTab, tabs**
+**activeTab**
 `Reloads the currently-active tab after disabling blocking, if the user has enabled that preference in settings.`
 
 **Host permissions (optional)**
@@ -89,7 +89,7 @@ Upload `PRIVACY.md` to a public GitHub repo and link to the rendered file, e.g.
 
 ---
 
-## Screenshots (1280×800 PNG each — at least one required)
+## Screenshots (1280×800 or 640×400, JPEG or 24-bit PNG, no alpha — at least one, up to 5)
 
 Suggested captures:
 1. **Popup — protected state**: open the extension while Pi-hole is blocking.
@@ -98,16 +98,21 @@ Suggested captures:
    countdown view with "Resume blocking" button.
 3. **Options page**: the settings screen filled in with a sample address.
 
-How to capture: open the popup, use Chrome DevTools → three-dot menu → **Run
-command** → "Capture node screenshot" on the `<body>`; or use a
-screenshot-extension/OS screenshot of the popup.
+**How to capture (recommended):**
+1. Click the extension icon to open the popup. Right-click inside it →
+   **Inspect**. DevTools opens scoped to the popup document.
+2. In DevTools press `Ctrl+Shift+P` → type **"Capture full size screenshot"** → Enter.
+   A PNG of the popup downloads.
+3. For the options page: right-click the icon → **Options** → DevTools → same command.
 
-If a capture is smaller than 1280×800, paste it onto a 1280×800 dark canvas
-(`#1c2230` matches the promo tile background) in any image editor before
-uploading.
+**Compose to 1280×800:**
+Open `icons/screenshots.html`, drop the captured PNG in, tweak the caption,
+and click **Download JPEG**. Output is a 1280×800 JPEG with no alpha, ready
+to upload.
 
 ## Small promo tile (required)
-Use the `promo-440x280.png` produced by `icons/generate.html`.
+Use the `promo-440x280.jpg` produced by `icons/generate.html`.
 
 ## Marquee promo tile (1400×560, optional)
-Skip unless you want featured placement.
+Use the `marquee-1400x560.jpg` produced by `icons/generate.html`. Only needed
+if you want to be eligible for featured placement.

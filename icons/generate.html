@@ -2,29 +2,31 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Generate Pi-hole Toggle icons</title>
+    <title>Generate Pi-hole Toggle icons & promo art</title>
     <style>
       body {
         font-family: system-ui, sans-serif;
         background: #1a1a1a;
         color: #eee;
         padding: 40px;
-        max-width: 640px;
+        max-width: 900px;
         margin: 0 auto;
       }
       h1 { font-size: 22px; margin-bottom: 6px; }
+      h2 { font-size: 13px; margin-top: 28px; margin-bottom: 8px; color: #aaa; letter-spacing: 0.08em; text-transform: uppercase; }
       p  { color: #aaa; font-size: 13px; }
       .row {
         display: flex;
         gap: 16px;
         align-items: center;
-        margin-top: 24px;
+        flex-wrap: wrap;
       }
       .preview {
         background: repeating-conic-gradient(#2a2a2a 0 25%, #1f1f1f 0 50%) 0 0 / 12px 12px;
         padding: 8px;
         border-radius: 6px;
       }
+      .preview canvas { display: block; max-width: 100%; height: auto; }
       button {
         padding: 10px 16px;
         background: #f39c3c;
@@ -40,89 +42,47 @@
     </style>
   </head>
   <body>
-    <h1>Pi-hole Toggle — icon generator</h1>
+    <h1>Pi-hole Toggle — icons &amp; promo art</h1>
     <p>
-      Click <b>Generate all</b>. Your browser will download
-      <code>icon-16.png</code>, <code>icon-48.png</code>,
-      <code>icon-128.png</code>, and <code>promo-440x280.png</code>.
-      Save them into this <code>icons/</code> folder (move the promo tile wherever you like —
-      it's for the store listing, not bundled in the extension).
+      Click <b>Generate all</b>. Your browser will download:
+      <code>icon-16.png</code>, <code>icon-48.png</code>, <code>icon-128.png</code>,
+      <code>promo-440x280.jpg</code>, and <code>marquee-1400x560.jpg</code>.
+      Save the icon PNGs into this <code>icons/</code> folder. The promo/marquee JPEGs are
+      for the Chrome Web Store listing (no alpha channel).
     </p>
 
+    <h2>Toolbar &amp; store icons</h2>
     <div class="row">
       <div class="preview"><canvas id="p16"  width="16"  height="16"></canvas></div>
       <div class="preview"><canvas id="p48"  width="48"  height="48"></canvas></div>
       <div class="preview"><canvas id="p128" width="128" height="128"></canvas></div>
     </div>
 
+    <h2>Small promo tile · 440 × 280</h2>
     <div class="row">
       <div class="preview" style="padding:0"><canvas id="pPromo" width="440" height="280"></canvas></div>
     </div>
 
+    <h2>Marquee promo tile · 1400 × 560</h2>
     <div class="row">
+      <div class="preview" style="padding:0"><canvas id="pMarquee" width="1400" height="560"></canvas></div>
+    </div>
+
+    <div class="row" style="margin-top: 32px;">
       <button id="go">Generate all</button>
     </div>
 
     <script>
-      // Palette — matches popup.css
-      const BG     = "#1f2530";
-      const BORDER = "#3a4252";
-      const DOT    = "#f3a94a";  // amber
+      const BG_TOP    = "#242b38";
+      const BG_BOT    = "#161b24";
+      const PROMO_BG_TOP = "#1c2230";
+      const PROMO_BG_BOT = "#10141c";
+      const BORDER   = "#3a4252";
+      const DOT      = "#f3a94a";
       const DOT_GLOW = "rgba(243, 169, 74, 0.35)";
-      const TEXT   = "#f4f4f4";
-
-      // Hypothesis: a single amber "status dot" on a dark rounded square —
-      // the memorable element from the popup, readable at 16px.
-      function drawIcon(ctx, size) {
-        const r = Math.max(2, Math.round(size * 0.18)); // corner radius
-        const pad = Math.max(0, Math.round(size * 0.0));
-
-        // Background (rounded square)
-        ctx.clearRect(0, 0, size, size);
-        roundedRect(ctx, pad, pad, size - pad * 2, size - pad * 2, r);
-        const grad = ctx.createLinearGradient(0, 0, 0, size);
-        grad.addColorStop(0, "#242b38");
-        grad.addColorStop(1, "#161b24");
-        ctx.fillStyle = grad;
-        ctx.fill();
-
-        // Inner border hairline
-        if (size >= 32) {
-          ctx.lineWidth = Math.max(1, size * 0.012);
-          ctx.strokeStyle = BORDER;
-          roundedRect(ctx, pad + 0.5, pad + 0.5, size - pad * 2 - 1, size - pad * 2 - 1, r - 0.5);
-          ctx.stroke();
-        }
-
-        // Glow ring
-        const cx = size / 2;
-        const cy = size / 2;
-        const dotR = size * 0.22;
-
-        if (size >= 24) {
-          ctx.beginPath();
-          ctx.arc(cx, cy, dotR * 1.9, 0, Math.PI * 2);
-          const glow = ctx.createRadialGradient(cx, cy, dotR, cx, cy, dotR * 2.2);
-          glow.addColorStop(0, DOT_GLOW);
-          glow.addColorStop(1, "rgba(243, 169, 74, 0)");
-          ctx.fillStyle = glow;
-          ctx.fill();
-        }
-
-        // Dot
-        ctx.beginPath();
-        ctx.arc(cx, cy, dotR, 0, Math.PI * 2);
-        ctx.fillStyle = DOT;
-        ctx.fill();
-
-        // Tiny highlight on dot for tactility (48+ only)
-        if (size >= 48) {
-          ctx.beginPath();
-          ctx.arc(cx - dotR * 0.3, cy - dotR * 0.3, dotR * 0.35, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
-          ctx.fill();
-        }
-      }
+      const TEXT     = "#f4f4f4";
+      const TEXT_MUTED = "#9aa3b4";
+      const TEXT_DIM   = "#7f8a9c";
 
       function roundedRect(ctx, x, y, w, h, r) {
         ctx.beginPath();
@@ -134,76 +94,171 @@
         ctx.closePath();
       }
 
-      function drawPromo(ctx, w, h) {
-        // Background
+      function drawIcon(ctx, size) {
+        const r = Math.max(2, Math.round(size * 0.18));
+        ctx.clearRect(0, 0, size, size);
+        roundedRect(ctx, 0, 0, size, size, r);
+        const grad = ctx.createLinearGradient(0, 0, 0, size);
+        grad.addColorStop(0, BG_TOP);
+        grad.addColorStop(1, BG_BOT);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        if (size >= 32) {
+          ctx.lineWidth = Math.max(1, size * 0.012);
+          ctx.strokeStyle = BORDER;
+          roundedRect(ctx, 0.5, 0.5, size - 1, size - 1, r - 0.5);
+          ctx.stroke();
+        }
+
+        const cx = size / 2, cy = size / 2, dotR = size * 0.22;
+
+        if (size >= 24) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, dotR * 1.9, 0, Math.PI * 2);
+          const glow = ctx.createRadialGradient(cx, cy, dotR, cx, cy, dotR * 2.2);
+          glow.addColorStop(0, DOT_GLOW);
+          glow.addColorStop(1, "rgba(243, 169, 74, 0)");
+          ctx.fillStyle = glow;
+          ctx.fill();
+        }
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = DOT;
+        ctx.fill();
+
+        if (size >= 48) {
+          ctx.beginPath();
+          ctx.arc(cx - dotR * 0.3, cy - dotR * 0.3, dotR * 0.35, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+          ctx.fill();
+        }
+      }
+
+      function fillGridBg(ctx, w, h) {
         const grad = ctx.createLinearGradient(0, 0, w, h);
-        grad.addColorStop(0, "#1c2230");
-        grad.addColorStop(1, "#10141c");
+        grad.addColorStop(0, PROMO_BG_TOP);
+        grad.addColorStop(1, PROMO_BG_BOT);
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, w, h);
 
-        // Subtle grid
         ctx.strokeStyle = "rgba(255,255,255,0.03)";
         ctx.lineWidth = 1;
-        for (let x = 0; x < w; x += 20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-        for (let y = 0; y < h; y += 20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+        const gap = Math.max(20, Math.round(w / 70));
+        for (let x = 0; x < w; x += gap) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+        for (let y = 0; y < h; y += gap) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+      }
 
-        // Icon on left
+      function drawIconInto(ctx, x, y, size) {
+        ctx.save();
+        ctx.translate(x, y);
+        drawIcon(ctx, size);
+        ctx.restore();
+      }
+
+      function drawPromoSmall(ctx, w, h) {
+        fillGridBg(ctx, w, h);
         const iconSize = 128;
         const iconX = 36;
         const iconY = (h - iconSize) / 2;
-        ctx.save();
-        ctx.translate(iconX, iconY);
-        const sub = ctx; // reuse context; drawIcon expects size to scale to
-        drawIcon(sub, iconSize);
-        ctx.restore();
+        drawIconInto(ctx, iconX, iconY, iconSize);
 
-        // Type lockup on right
         const textX = iconX + iconSize + 28;
         ctx.fillStyle = TEXT;
         ctx.font = "700 32px 'Host Grotesk', system-ui, sans-serif";
         ctx.textBaseline = "alphabetic";
         ctx.fillText("Pi-hole Toggle", textX, h / 2 - 6);
 
-        ctx.fillStyle = "#9aa3b4";
+        ctx.fillStyle = TEXT_MUTED;
         ctx.font = "500 14px 'Geist Mono', ui-monospace, monospace";
         ctx.fillText("One-click temporary disable", textX, h / 2 + 20);
 
-        // Accent dot
         ctx.beginPath();
         ctx.arc(textX + 2, h / 2 + 44, 4, 0, Math.PI * 2);
         ctx.fillStyle = DOT;
         ctx.fill();
-        ctx.fillStyle = "#7f8a9c";
+        ctx.fillStyle = TEXT_DIM;
         ctx.font = "500 11px 'Geist Mono', ui-monospace, monospace";
         ctx.fillText("  open · 4:27", textX + 6, h / 2 + 47);
       }
 
-      function download(canvas, filename) {
+      function drawMarquee(ctx, w, h) {
+        fillGridBg(ctx, w, h);
+
+        // Soft radial vignette to push the eye toward center-left
+        const vign = ctx.createRadialGradient(w * 0.35, h * 0.5, 0, w * 0.35, h * 0.5, w * 0.6);
+        vign.addColorStop(0, "rgba(243, 169, 74, 0.08)");
+        vign.addColorStop(1, "rgba(243, 169, 74, 0)");
+        ctx.fillStyle = vign;
+        ctx.fillRect(0, 0, w, h);
+
+        // Icon - large, left side
+        const iconSize = 260;
+        const iconX = 110;
+        const iconY = (h - iconSize) / 2;
+        drawIconInto(ctx, iconX, iconY, iconSize);
+
+        // Text lockup
+        const textX = iconX + iconSize + 72;
+        ctx.fillStyle = TEXT;
+        ctx.font = "700 88px 'Host Grotesk', system-ui, sans-serif";
+        ctx.textBaseline = "alphabetic";
+        ctx.fillText("Pi-hole Toggle", textX, h / 2 - 12);
+
+        ctx.fillStyle = TEXT_MUTED;
+        ctx.font = "500 28px 'Host Grotesk', system-ui, sans-serif";
+        ctx.fillText("Temporarily disable blocking from the toolbar.", textX, h / 2 + 34);
+
+        // Tag row — mimics the popup status
+        const tagY = h / 2 + 84;
+        ctx.beginPath();
+        ctx.arc(textX + 8, tagY, 7, 0, Math.PI * 2);
+        ctx.fillStyle = DOT;
+        ctx.shadowColor = DOT;
+        ctx.shadowBlur = 18;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = TEXT;
+        ctx.font = "600 18px 'Host Grotesk', system-ui, sans-serif";
+        ctx.fillText("OPEN", textX + 24, tagY + 6);
+        ctx.fillStyle = TEXT_DIM;
+        ctx.font = "500 16px 'Geist Mono', ui-monospace, monospace";
+        ctx.fillText("resumes in 4:27", textX + 80, tagY + 6);
+
+        // Footer mark, bottom right
+        ctx.fillStyle = TEXT_DIM;
+        ctx.font = "500 14px 'Geist Mono', ui-monospace, monospace";
+        ctx.textAlign = "right";
+        ctx.fillText("PI · HOLE · TOGGLE", w - 48, h - 36);
+        ctx.textAlign = "left";
+      }
+
+      function download(canvas, filename, type, quality) {
         const link = document.createElement("a");
         link.download = filename;
-        link.href = canvas.toDataURL("image/png");
+        link.href = canvas.toDataURL(type || "image/png", quality);
         link.click();
       }
 
       function renderAll() {
         [["p16", 16], ["p48", 48], ["p128", 128]].forEach(([id, size]) => {
           const c = document.getElementById(id);
-          const ctx = c.getContext("2d");
-          drawIcon(ctx, size);
+          drawIcon(c.getContext("2d"), size);
         });
-        drawPromo(document.getElementById("pPromo").getContext("2d"), 440, 280);
+        drawPromoSmall(document.getElementById("pPromo").getContext("2d"), 440, 280);
+        drawMarquee(document.getElementById("pMarquee").getContext("2d"), 1400, 560);
       }
 
       document.getElementById("go").addEventListener("click", async () => {
         renderAll();
-        download(document.getElementById("p16"),  "icon-16.png");
-        await new Promise((r) => setTimeout(r, 150));
-        download(document.getElementById("p48"),  "icon-48.png");
-        await new Promise((r) => setTimeout(r, 150));
-        download(document.getElementById("p128"), "icon-128.png");
-        await new Promise((r) => setTimeout(r, 150));
-        download(document.getElementById("pPromo"), "promo-440x280.png");
+        const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+        download(document.getElementById("p16"),  "icon-16.png",  "image/png");   await wait(150);
+        download(document.getElementById("p48"),  "icon-48.png",  "image/png");   await wait(150);
+        download(document.getElementById("p128"), "icon-128.png", "image/png");   await wait(150);
+        download(document.getElementById("pPromo"),   "promo-440x280.jpg",   "image/jpeg", 0.94); await wait(150);
+        download(document.getElementById("pMarquee"), "marquee-1400x560.jpg", "image/jpeg", 0.94);
       });
 
       renderAll();

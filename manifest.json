@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Pi-hole Toggle",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Temporarily disable Pi-hole blocking from the toolbar (Pi-hole v6).",
-  "permissions": ["storage", "activeTab", "tabs"],
+  "permissions": ["storage", "activeTab"],
   "optional_host_permissions": ["*://*/*"],
   "action": {
     "default_popup": "popup.html",

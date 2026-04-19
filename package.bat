@@ -7,7 +7,6 @@ echo.
 echo  Pi-hole Toggle - package for Chrome Web Store
 echo  ---------------------------------------------
 
-rem --- sanity: icons must exist ---
 for %%F in (icons\icon-16.png icons\icon-48.png icons\icon-128.png) do (
   if not exist "%%F" (
     echo  [x] Missing %%F
@@ -18,7 +17,6 @@ for %%F in (icons\icon-16.png icons\icon-48.png icons\icon-128.png) do (
   )
 )
 
-rem --- pull version from manifest.json ---
 for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "(Get-Content -Raw manifest.json | ConvertFrom-Json).version"`) do set VERSION=%%V
 
 if "%VERSION%"=="" (
@@ -37,8 +35,7 @@ echo  [i] Version: %VERSION%
 echo  [i] Output : %ZIP%
 echo.
 
-powershell -NoProfile -Command ^
-  "Compress-Archive -Force -Path manifest.json,background.js,popup.html,popup.css,popup.js,options.html,options.js,icons/icon-16.png,icons/icon-48.png,icons/icon-128.png -DestinationPath '%ZIP%'"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0package.ps1" -Version "%VERSION%" -OutPath "%ZIP%"
 
 if errorlevel 1 (
   echo.
